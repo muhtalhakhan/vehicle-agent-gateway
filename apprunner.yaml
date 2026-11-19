@@ -1,0 +1,23 @@
+# AWS App Runner source-code deployment (Node.js 22 managed runtime).
+# Secrets (JWT_SECRET, CLIENTS_JSON) come from AWS Secrets Manager, never from this file.
+version: 1.0
+runtime: nodejs22
+build:
+  commands:
+    build:
+      - npm ci
+      - npm run build
+run:
+  command: node dist/server.js
+  network:
+    port: 8080
+  env:
+    - name: NODE_ENV
+      value: production
+    - name: PUBLIC_URL
+      value: https://REPLACE-WITH-YOUR-APP-RUNNER-URL
+  secrets:
+    - name: JWT_SECRET
+      value-from: arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:vehicle-gateway/jwt-secret
+    - name: CLIENTS_JSON
+      value-from: arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:vehicle-gateway/clients
