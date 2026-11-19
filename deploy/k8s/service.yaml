@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+spec:
+  selector: { app: vehicle-agent-gateway }
+  ports:
+    - { name: http, port: 80, targetPort: http }

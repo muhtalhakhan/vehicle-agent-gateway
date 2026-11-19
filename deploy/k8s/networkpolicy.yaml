@@ -1,0 +1,12 @@
+# Only HTTP into the gateway; nothing else in the namespace is reachable from it by default.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-ingress-http-only
+spec:
+  podSelector:
+    matchLabels: { app: vehicle-agent-gateway }
+  policyTypes: [Ingress]
+  ingress:
+    - ports:
+        - { port: 8080, protocol: TCP }

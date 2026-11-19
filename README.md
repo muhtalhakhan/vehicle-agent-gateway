@@ -83,6 +83,31 @@ curl -s localhost:8080/a2a -H "Authorization: Bearer $TOKEN" -H 'Content-Type: a
 
 Any MCP client that supports Streamable HTTP with a bearer header can connect to `http://localhost:8080/mcp`.
 
+## Run on Kubernetes
+
+`deploy/k8s/` is a kustomize setup: Namespace (Pod Security `restricted`), ConfigMap, Secret generated
+from a git-ignored `secrets.env`, Deployment, Service and NetworkPolicy.
+
+```bash
+brew install kind            # or any cluster; kubectl apply -k deploy/k8s works anywhere
+./scripts/k8s-local.sh       # create a kind cluster, build + load the image, deploy, smoke-test
+./scripts/k8s-local.sh down  # delete the cluster
+```
+
+The script generates `deploy/k8s/secrets.env` (random JWT key and client secret) on first run, waits
+for the rollout, port-forwards the Service and checks health, OAuth, a 401 without a token, the six MCP
+tools, the A2A card, and that the demo panel is hidden with real clients. CI runs the same script on
+every push (`.github/workflows/ci.yml`).
+
+Pod hardening: non-root user, read-only root filesystem, all capabilities dropped, no privilege
+escalation, seccomp `RuntimeDefault`, no service-account token, CPU/memory requests and limits,
+readiness and liveness probes on `/health`. A changed secret gets a new name hash, which rolls the
+Deployment automatically.
+
+**Why one replica:** A2A tasks waiting for confirmation are kept in memory. Running more replicas
+needs that state in a shared store (e.g. Redis) first; until then a HorizontalPodAutoscaler would
+break the confirmation flow, so there isn't one.
+
 ## Deploy (AWS App Runner)
 
 `apprunner.yaml` builds from source on the managed Node.js runtime; `Dockerfile` works for an image-based
@@ -100,4 +125,4 @@ to the service URL. The service refuses to start in production without both secr
 ## Stack
 
 TypeScript · Node.js · Express · `@modelcontextprotocol/sdk` · A2A protocol 0.3 · OAuth 2.0 · `jose` (JWT) ·
-zod · Vitest · Docker · AWS App Runner
+zod · Vitest · Docker · Kubernetes (kustomize, kind) · GitHub Actions · AWS App Runner
