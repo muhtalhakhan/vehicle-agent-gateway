@@ -14,6 +14,8 @@ export type Config = {
   jwtSecret: Uint8Array;
   tokenTtlSeconds: number;
   clients: Record<string, ClientConfig>;
+  /** True when the built-in demo clients are active (no CLIENTS_JSON). Enables the home page demo. */
+  demoClients: boolean;
 };
 
 /** Demo clients for local use only. In production, pass CLIENTS_JSON. */
@@ -37,5 +39,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     jwtSecret: env.JWT_SECRET ? new TextEncoder().encode(env.JWT_SECRET) : randomBytes(32),
     tokenTtlSeconds: Number(env.TOKEN_TTL_SECONDS ?? 900),
     clients: env.CLIENTS_JSON ? JSON.parse(env.CLIENTS_JSON) : DEMO_CLIENTS,
+    demoClients: !env.CLIENTS_JSON,
   };
 }

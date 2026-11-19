@@ -4,6 +4,7 @@ import { ActionRunner } from "./actions.js";
 import { a2aRouter } from "./a2a.js";
 import { authRouter, tokenVerifier } from "./auth.js";
 import type { Config } from "./config.js";
+import { homePage } from "./home.js";
 import { mcpHandler } from "./mcp.js";
 import { VehicleService } from "./vehicles.js";
 
@@ -17,6 +18,8 @@ export function createApp(cfg: Config, svc = new VehicleService()) {
 
   app.disable("x-powered-by");
   app.get("/health", (_req, res) => res.json({ ok: true }));
+  const home = homePage(cfg);
+  app.get("/", (_req, res) => res.type("html").send(home));
   app.use(authRouter(cfg));
 
   app.post("/mcp", bearer, express.json({ limit: "100kb" }), mcpHandler(runner));

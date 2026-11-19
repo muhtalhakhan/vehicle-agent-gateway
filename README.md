@@ -53,8 +53,14 @@ architecture, not the vehicle.
 ```bash
 npm install
 npm run dev            # http://localhost:8080
-npm test               # 19 end-to-end tests: OAuth, MCP via the official SDK client, A2A
+npm test               # 21 end-to-end tests: OAuth, MCP via the official SDK client, A2A
 ```
+
+Open http://localhost:8080 for a page that lists the endpoints and, in demo mode, has a **Try it** panel
+that runs the real flow (token → MCP tool call → A2A task) from the browser. With real clients configured,
+the panel and any credentials are hidden.
+
+Or with Docker: `docker build -t vehicle-agent-gateway . && docker run -p 8080:8080 -e NODE_ENV=development vehicle-agent-gateway`
 
 Without `CLIENTS_JSON`, two demo clients exist: `assistant-readonly` / `readonly-demo-secret`
 (`vehicle:read`) and `assistant-full` / `full-demo-secret` (both scopes). Never use them in production.

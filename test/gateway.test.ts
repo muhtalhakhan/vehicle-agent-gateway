@@ -202,3 +202,23 @@ describe("text intent parser", () => {
     expect(parseText(input)?.action).toBe(action);
   });
 });
+
+describe("home page", () => {
+  it("lists endpoints and offers the demo panel in demo mode", async () => {
+    const res = await request(app).get("/");
+    expect(res.status).toBe(200);
+    expect(res.headers["content-type"]).toContain("text/html");
+    expect(res.text).toContain("/.well-known/agent-card.json");
+    expect(res.text).toContain("Try it");
+  });
+
+  it("never shows demo credentials when real clients are configured", async () => {
+    const prod = createApp(loadConfig({
+      JWT_SECRET: "x".repeat(40), CLIENTS_JSON: JSON.stringify({ real: { secret: "s3cret", scopes: ["vehicle:read"] } }),
+    })).app;
+    const res = await request(prod).get("/");
+    expect(res.text).not.toContain("Try it");
+    expect(res.text).not.toContain("demo-secret");
+    expect(res.text).not.toContain("s3cret");
+  });
+});
